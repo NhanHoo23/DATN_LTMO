@@ -13,7 +13,7 @@ import {updateUser} from '../../../redux/actions/userActions';
 import {useDispatch} from 'react-redux';
 import {fetchInformation} from '../../../redux/actions/infomationActions';
 import TextField from '../../../components/TextField';
-import ScreenSize from '../../../contants/ScreenSize';
+import ScreenSize from '../../../constants/ScreenSize';
 import FilledButton from '../../../components/FilledButton';
 import LoadingDialog from '../../../dialogs/loadingDialog';
 

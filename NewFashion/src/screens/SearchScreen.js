@@ -1,171 +1,227 @@
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
 import SearchBar from '../components/SearchBar';
 import ProductCard from '../components/ProductCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDispatch } from 'react-redux';
-import { searchProduct } from '../redux/actions/productActions';
-import {uploadImageForImageCrop} from "../until/upload";
-import axios from "../service/axios";
-import LoadingDialog from "../dialogs/loadingDialog";
+import {useDispatch} from 'react-redux';
+import {searchProduct} from '../redux/actions/productActions';
+import {uploadImageForImageCrop} from '../until/upload';
+import axios from '../service/axios';
+import LoadingDialog from '../dialogs/loadingDialog';
 
-
-
-const SearchScreen = ({ navigation, onSearch }) => {
+const SearchScreen = ({navigation, onSearch}) => {
   const [recentSearch, setRecentSearch] = useState([]);
   const [browsingHistory, setBrowsingHistory] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [productList, setProductList] = useState([]);
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   /// lịch sử tìm kiếm
   useEffect(() => {
     const fetchLocalData = async () => {
       try {
         const storedRecentSearch = await AsyncStorage.getItem('recentSearch');
-        const storedBrowsingHistory = await AsyncStorage.getItem('browsingHistory');
-        setRecentSearch(storedRecentSearch ? JSON.parse(storedRecentSearch) : []);
-        setBrowsingHistory(storedBrowsingHistory ? JSON.parse(storedBrowsingHistory) : []);
+        const storedBrowsingHistory = await AsyncStorage.getItem(
+          'browsingHistory',
+        );
+        setRecentSearch(
+          storedRecentSearch ? JSON.parse(storedRecentSearch) : [],
+        );
+        setBrowsingHistory(
+          storedBrowsingHistory ? JSON.parse(storedBrowsingHistory) : [],
+        );
       } catch (error) {
-        console.error('Error fetching local data:', error);
+        // console.error('Error fetching local data:', error);
+        console.log('Error fetching local data:', error);
       }
     };
     fetchLocalData();
   }, []);
   // chi tiết sản phẩm
-  const handleSelectedItem = (item) => {
+  const handleSelectedItem = item => {
     console.log('Selected item:', item);
-    navigation.navigate("ProductDetail", { item });
-  }
+    navigation.navigate('ProductDetail', {item});
+  };
 
-  const fetchProducts = async (query) => {
+  const fetchProducts = async query => {
     setSearchQuery(query);
     if (!query.trim()) {
       setProductList([]);
       return;
     }
     dispatch(searchProduct(query))
-      .then(async (kq) => {
-        const results = kq.payload
-        setProductList(results)
+      .then(async kq => {
+        const results = kq.payload;
+        setProductList(results);
         if (results.length > 0) {
           const updatedRecentSearch = [...new Set([query, ...recentSearch])];
           setRecentSearch(updatedRecentSearch);
-          await AsyncStorage.setItem('recentSearch', JSON.stringify(updatedRecentSearch));
+          await AsyncStorage.setItem(
+            'recentSearch',
+            JSON.stringify(updatedRecentSearch),
+          );
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.log('err ', error);
       });
   };
-  const onImagePicked = async (image)=> {
+  const onImagePicked = async image => {
     setLoading(true);
-    const imageLink =await uploadImageForImageCrop(image);
-    const res = await axios.post('tensor/search-by-image',{ imageUrl : imageLink[0] });
+    const imageLink = await uploadImageForImageCrop(image);
+    const res = await axios.post('tensor/search-by-image', {
+      imageUrl: imageLink[0],
+    });
     if (res && res.data) {
       setProductList(res.data);
       setSearchQuery('image');
       setLoading(false);
     }
-  }
+  };
   return (
-      <>
-        <LoadingDialog loading={loading}/>
-        <View>
-      {/* Header */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16 }}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={require('../assets/ic_back.png')} style={{ width: 20, height: 20 }} />
-        </TouchableOpacity>
-        <SearchBar disable={true} onSearch={fetchProducts} onImagePicked={onImagePicked} />
-      </View>
+    <>
+      <LoadingDialog loading={loading} />
+      <View>
+        {/* Header */}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+          }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../assets/ic_back.png')}
+              style={{width: 20, height: 20}}
+            />
+          </TouchableOpacity>
+          <SearchBar
+            disable={true}
+            onSearch={fetchProducts}
+            onImagePicked={onImagePicked}
+          />
+        </View>
 
-      {/* Hiển thị DataSearch khi có nội dung tìm kiếm */}
-      {searchQuery.trim().length > 0 ? (
-        <FlatList
-          data={productList}
-          numColumns={2}
-          renderItem={({ item }) => (
-            <View style={{ flex: 1 / 2}}>
-              <ProductCard
-                item={item}
-                onSelected={() => { handleSelectedItem(item) }}
-                style={{padding:5}}
-              />
-            </View>
-          )}
-          keyExtractor={(item) => item._id}
-        />
-      ) : (
-        <>
-          {/* Recent Search */}
-          {recentSearch.length > 0 && (
-            <View style={{ paddingHorizontal: 16, marginBottom: 10 }}>
-              <View style={[{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 5 }]}>
-                <Text style={styles.sectionTitle}>Từ khóa vừa tìm kiếm</Text>
-                <TouchableOpacity
-                  onPress={async () => {
-                    try {
-                      await AsyncStorage.removeItem('recentSearch');
-                      setRecentSearch([]);
-                    } catch (error) {
-                      console.error('Error clearing recent search:', error);
-                    }
+        {/* Hiển thị DataSearch khi có nội dung tìm kiếm */}
+        {searchQuery.trim().length > 0 ? (
+          <FlatList
+            data={productList}
+            numColumns={2}
+            renderItem={({item}) => (
+              <View style={{flex: 1 / 2}}>
+                <ProductCard
+                  item={item}
+                  onSelected={() => {
+                    handleSelectedItem(item);
                   }}
-                >
-                  <Image source={require('../assets/icons/ic_trash_2x.png')} style={styles.icon} />
-                </TouchableOpacity>
+                  style={{padding: 5}}
+                />
               </View>
-              <FlatList
-                data={recentSearch}
-                renderItem={({ item }) => (
-                  <Text style={{
-                    padding: 10,
-                    fontSize: 16,
-                    color: '#000',
-                    borderBottomColor: '#e0e0e0',
-                    borderBottomWidth: 1,
-                  }}>
-                    {item}
-                  </Text>
-                )}
-                keyExtractor={(item, index) => index}
-                showsHorizontalScrollIndicator={false}
-              />
-            </View>
-          )}
-
-          {/* Browsing History */}
-          {browsingHistory.length > 0 && (
-            <View style={{ paddingHorizontal: 16 }}>
-              <View style={[ { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 5, paddingBottom: 5 }]}>
-                <Text style={styles.sectionTitle}>Lịch sử tìm kiếm</Text>
-              </View>
-              <FlatList
-                data={browsingHistory}
-                renderItem={({ item }) => (
-                  <View style={{ width: 140,marginHorizontal:5}}>
-                    <ProductCard
-                      item={item}
-                      onSelected={() => { handleSelectedItem(item) }}
-                      style={{ width: 140 }}
+            )}
+            keyExtractor={item => item._id}
+          />
+        ) : (
+          <>
+            {/* Recent Search */}
+            {recentSearch.length > 0 && (
+              <View style={{paddingHorizontal: 16, marginBottom: 10}}>
+                <View
+                  style={[
+                    {
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      paddingRight: 5,
+                    },
+                  ]}>
+                  <Text style={styles.sectionTitle}>Từ khóa vừa tìm kiếm</Text>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      try {
+                        await AsyncStorage.removeItem('recentSearch');
+                        setRecentSearch([]);
+                      } catch (error) {
+                        // console.error('Error clearing recent search:', error);
+                        console.log('Error clearing recent search:', error);
+                      }
+                    }}>
+                    <Image
+                      source={require('../assets/icons/ic_trash_2x.png')}
+                      style={styles.icon}
                     />
-                  </View>
-                )}
-                keyExtractor={(item) => item._id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-              />
-            </View>
-          )}
-        </>
-      )}
-    </View>
-      </>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={recentSearch}
+                  renderItem={({item}) => (
+                    <Text
+                      style={{
+                        padding: 10,
+                        fontSize: 16,
+                        color: '#000',
+                        borderBottomColor: '#e0e0e0',
+                        borderBottomWidth: 1,
+                      }}>
+                      {item}
+                    </Text>
+                  )}
+                  keyExtractor={(item, index) => index}
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
+            )}
+
+            {/* Browsing History */}
+            {browsingHistory.length > 0 && (
+              <View style={{paddingHorizontal: 16}}>
+                <View
+                  style={[
+                    {
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      paddingRight: 5,
+                      paddingBottom: 5,
+                    },
+                  ]}>
+                  <Text style={styles.sectionTitle}>Lịch sử tìm kiếm</Text>
+                </View>
+                <FlatList
+                  data={browsingHistory}
+                  renderItem={({item}) => (
+                    <View style={{width: 140, marginHorizontal: 5}}>
+                      <ProductCard
+                        item={item}
+                        onSelected={() => {
+                          handleSelectedItem(item);
+                        }}
+                        style={{width: 140}}
+                      />
+                    </View>
+                  )}
+                  keyExtractor={item => item._id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
+            )}
+          </>
+        )}
+      </View>
+    </>
   );
 };
 
-export default SearchScreen
+export default SearchScreen;
 
 const styles = StyleSheet.create({
   searchContainer: {
@@ -174,7 +230,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: '#000',
-    borderRadius: 40
+    borderRadius: 40,
   },
   searchInput: {
     flex: 1,
@@ -189,11 +245,11 @@ const styles = StyleSheet.create({
     margin: 3,
     padding: 8,
     paddingHorizontal: 16,
-    borderRadius: 40
+    borderRadius: 40,
   },
   searchIcon: {
     width: 25,
-    height: 25
+    height: 25,
   },
   icon: {
     width: 18,
@@ -236,32 +292,32 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   BrowsingImage: {
-    width: "100%",
+    width: '100%',
     height: 160,
     borderRadius: 10,
   },
   BrowsingRatingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 5,
   },
   BrowsingStars: {
     fontSize: 14,
-    color: "#FFD700",
+    color: '#FFD700',
     marginRight: 5,
   },
   BrowsingReviews: {
     fontSize: 12,
-    color: "#555",
+    color: '#555',
   },
   BrowsingPrice: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 5,
   },
   BrowsingSold: {
     fontSize: 12,
-    color: "#777",
+    color: '#777',
   },
   // màn hình search
   imageSearchList: {
@@ -277,4 +333,4 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: '#747474',
   },
-})
+});

@@ -1,16 +1,28 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, FlatList, Text, TouchableOpacity, Animated, ActivityIndicator, Image, TextInput, StyleSheet } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchSubCategories } from '../../redux/actions/subCateActions';
-import ScreenSize from '../../contants/ScreenSize';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
+import {
+  View,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  Animated,
+  ActivityIndicator,
+  Image,
+  TextInput,
+  StyleSheet,
+} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchSubCategories} from '../../redux/actions/subCateActions';
+import ScreenSize from '../../constants/ScreenSize';
 import StarRating from '../../components/StarRating';
 import SearchBar from '../../components/SearchBar';
 import ProductCard from '../../components/ProductCard';
 
-const CategoryScreen = ({ navigation }) => {
+const CategoryScreen = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
   const categories = useSelector(state => state.category.categories);
-  const subCategoriesByCategory = useSelector(state => state.subCategory.subCategoriesByCategory);
+  const subCategoriesByCategory = useSelector(
+    state => state.subCategory.subCategoriesByCategory,
+  );
   const dispatch = useDispatch();
 
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -18,10 +30,10 @@ const CategoryScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const translateAnim = useRef(new Animated.Value(0)).current;
 
-  const subCateColNum = 3
-  const subCateColumnWidth = (ScreenSize.width * (3 / 4) / subCateColNum);
-  const productColNum = 2
-  const productColumnWidth = (ScreenSize.width * (3 / 4) / productColNum);
+  const subCateColNum = 3;
+  const subCateColumnWidth = (ScreenSize.width * (3 / 4)) / subCateColNum;
+  const productColNum = 2;
+  const productColumnWidth = (ScreenSize.width * (3 / 4)) / productColNum;
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -30,67 +42,94 @@ const CategoryScreen = ({ navigation }) => {
     }
   }, [categories]);
 
-  const fetchSubCateByCategoryID = (categoryId) => {
+  const fetchSubCateByCategoryID = categoryId => {
     if (subCategoriesByCategory[categoryId]) {
-      const { products } = subCategoriesByCategory[categoryId];
+      const {products} = subCategoriesByCategory[categoryId];
       setProducts(products);
       setLoading(false);
     } else {
       setLoading(true);
       dispatch(fetchSubCategories(categoryId))
-        .then((result) => {
-          const { products } = result.payload;
+        .then(result => {
+          const {products} = result.payload;
           console.log('Fetch subCategories success: ', products);
 
           setProducts(products);
           setLoading(false);
         })
-        .catch((error) => {
+        .catch(error => {
           console.log('Fetch subCategories error: ', error);
         });
     }
   };
 
-  const handleCategoryPress = useCallback((category, index) => {
-    setSelectedCategory(category);
-    fetchSubCateByCategoryID(category._id);
-  }, [selectedCategory, categories]);
+  const handleCategoryPress = useCallback(
+    (category, index) => {
+      setSelectedCategory(category);
+      fetchSubCateByCategoryID(category._id);
+    },
+    [selectedCategory, categories],
+  );
 
-  const renderCategoryItem = ({ item, index }) => (
+  const renderCategoryItem = ({item, index}) => (
     <TouchableOpacity
       style={[
-        { width: '100%', padding: 10, paddingLeft: 0, backgroundColor: '#F0F0F0', flexDirection: 'row' },
-        selectedCategory === item && { backgroundColor: '#fff' }]}
+        {
+          width: '100%',
+          padding: 10,
+          paddingLeft: 0,
+          backgroundColor: '#F0F0F0',
+          flexDirection: 'row',
+        },
+        selectedCategory === item && {backgroundColor: '#fff'},
+      ]}
       onPress={() => handleCategoryPress(item, index)}>
-      <View style={{ backgroundColor: selectedCategory === item ? 'black' : 'transparent', width: 5 }} />
+      <View
+        style={{
+          backgroundColor: selectedCategory === item ? 'black' : 'transparent',
+          width: 5,
+        }}
+      />
       <Text
-        style={[{ fontSize: 14, fontWeight: 'medium', marginLeft: 5 }, selectedCategory === item && { fontWeight: 'bold' }]}>
+        style={[
+          {fontSize: 14, fontWeight: 'medium', marginLeft: 5},
+          selectedCategory === item && {fontWeight: 'bold'},
+        ]}>
         {item.categoryName}
       </Text>
     </TouchableOpacity>
   );
 
-  const renderSubCategoryItem = ({ item }) => (
-    <TouchableOpacity style={{ alignItems: 'center', width: subCateColumnWidth, padding: 10 }} onPress={() => handleSelectedSubCategory(item)}>
-      <Image source={{ uri: item.subImage }} style={{ width: 50, height: 50, borderRadius: 25 }} />
-      <Text style={{ fontSize: 12, textAlign: 'center' }}>{item.subCateName}</Text>
+  const renderSubCategoryItem = ({item}) => (
+    <TouchableOpacity
+      style={{alignItems: 'center', width: subCateColumnWidth, padding: 10}}
+      onPress={() => handleSelectedSubCategory(item)}>
+      <Image
+        source={{uri: item.subImage}}
+        style={{width: 50, height: 50, borderRadius: 25}}
+      />
+      <Text style={{fontSize: 12, textAlign: 'center'}}>
+        {item.subCateName}
+      </Text>
     </TouchableOpacity>
   );
 
-  const handleSelectedItem = (item) => {
-    navigation.navigate("ProductDetail", { item });
-  }
+  const handleSelectedItem = item => {
+    navigation.navigate('ProductDetail', {item});
+  };
 
-  const handleSelectedSubCategory = (subCategory) => {
-    navigation.navigate("SubCateDetail", { subCategory });
-  }
+  const handleSelectedSubCategory = subCategory => {
+    navigation.navigate('SubCateDetail', {subCategory});
+  };
 
   const ListHeaderComponent = () => {
     if (!selectedCategory) {
       return null;
     }
 
-    const { subCategories } = subCategoriesByCategory[selectedCategory._id] || { subCategories: [] };
+    const {subCategories} = subCategoriesByCategory[selectedCategory._id] || {
+      subCategories: [],
+    };
 
     return (
       <View>
@@ -99,13 +138,21 @@ const CategoryScreen = ({ navigation }) => {
             data={subCategories}
             renderItem={renderSubCategoryItem}
             numColumns={3}
-            keyExtractor={(item,index) =>`${item._id}${index} subcategory in categoryScreen`}
-
+            keyExtractor={(item, index) =>
+              `${item._id}${index} subcategory in categoryScreen`
+            }
             showsVerticalScrollIndicator={false}
           />
 
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
-            <Text style={{ fontSize: 14, fontWeight: 'bold' }}>Sản phẩm liên quan</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              padding: 10,
+            }}>
+            <Text style={{fontSize: 14, fontWeight: 'bold'}}>
+              Sản phẩm liên quan
+            </Text>
           </View>
         </>
       </View>
@@ -113,8 +160,10 @@ const CategoryScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#FFF' }}>
-      <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.searchContainer}>
+    <View style={{flex: 1, backgroundColor: '#FFF'}}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Search')}
+        style={styles.searchContainer}>
         <TextInput
           value={searchText}
           style={styles.searchInput}
@@ -123,53 +172,71 @@ const CategoryScreen = ({ navigation }) => {
           editable={false}
         />
         {searchText.length > 0 && (
-          <TouchableOpacity style={styles.clearButton}
-          // onPress={handleClearText}
+          <TouchableOpacity
+            style={styles.clearButton}
+            // onPress={handleClearText}
           >
-            <Image source={require('../../assets/bt_clearText.png')} style={styles.icon} />
+            <Image
+              source={require('../../assets/bt_clearText.png')}
+              style={styles.icon}
+            />
           </TouchableOpacity>
         )}
-        <TouchableOpacity style={styles.searchButton}
-          onPress={() => navigation.navigate('Search')}
-        >
-          <Image source={require('../../assets/icons/ic_search.png')} style={styles.searchIcon} />
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={() => navigation.navigate('Search')}>
+          <Image
+            source={require('../../assets/icons/ic_search.png')}
+            style={styles.searchIcon}
+          />
         </TouchableOpacity>
       </TouchableOpacity>
 
-      <View style={{ flexDirection: 'row', flex: 1, backgroundColor: '#FFF', overflow: 'hidden' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          backgroundColor: '#FFF',
+          overflow: 'hidden',
+        }}>
         <FlatList
           data={categories}
           renderItem={renderCategoryItem}
-          keyExtractor={(item,index) =>`${item._id}${index} category in categoryScreen`}
+          keyExtractor={(item, index) =>
+            `${item._id}${index} category in categoryScreen`
+          }
           showsVerticalScrollIndicator={false}
-          style={{ flex: 1 }}
+          style={{flex: 1}}
         />
 
-        {selectedCategory && (
-          loading ? (
+        {selectedCategory &&
+          (loading ? (
             <ActivityIndicator style={{flex: 3}} size="large" color="#FA7806" />
           ) : (
-            <View style={{ flex: 3 }}>
+            <View style={{flex: 3}}>
               <FlatList
                 data={products}
                 ListHeaderComponent={ListHeaderComponent}
-                renderItem={({ item }) => (
+                renderItem={({item}) => (
                   <ProductCard
                     item={item}
-                    onSelected={() => { handleSelectedItem(item) }}
-                    style={{ flex: 1 }}
+                    onSelected={() => {
+                      handleSelectedItem(item);
+                    }}
+                    style={{flex: 1}}
                   />
                 )}
                 numColumns={2}
-                keyExtractor={(item,index) =>`${item._id}${index} product in categoryScreen`}
+                keyExtractor={(item, index) =>
+                  `${item._id}${index} product in categoryScreen`
+                }
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
+                contentContainerStyle={{paddingHorizontal: 10}}
               />
             </View>
-          )
-        )}
+          ))}
       </View>
-    </View >
+    </View>
   );
 };
 
@@ -182,7 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: '#000',
-    borderRadius: 40
+    borderRadius: 40,
   },
   searchInput: {
     flex: 1,
@@ -198,16 +265,16 @@ const styles = StyleSheet.create({
     margin: 3,
     padding: 8,
     paddingHorizontal: 16,
-    borderRadius: 40
+    borderRadius: 40,
   },
   searchIcon: {
     width: 25,
-    height: 25
+    height: 25,
   },
   icon: {
     width: 18,
     height: 18,
     marginRight: 7,
     resizeMode: 'contain',
-  }
-})
+  },
+});

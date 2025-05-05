@@ -1,9 +1,18 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Image, StyleSheet, Keyboard, Alert, Text } from 'react-native';
+import React, {useRef, useState, useEffect} from 'react';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Keyboard,
+  Alert,
+  Text,
+} from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import ImagePickerSheet from './ImagePickerSheet';
 
-const SearchBar = ({ disable, onSearch, onImagePicked }) => {
+const SearchBar = ({disable, onSearch, onImagePicked}) => {
   const [searchText, setSearchText] = useState('');
   const [debouncedSearchText, setDebouncedSearchText] = useState(searchText);
   const actionSheetRef = useRef();
@@ -15,7 +24,7 @@ const SearchBar = ({ disable, onSearch, onImagePicked }) => {
     return () => clearTimeout(handler);
   }, [debouncedSearchText]);
 
-  const handleTextChange = (text) => {
+  const handleTextChange = text => {
     setSearchText(text);
     setDebouncedSearchText(text);
   };
@@ -30,7 +39,7 @@ const SearchBar = ({ disable, onSearch, onImagePicked }) => {
     actionSheetRef.current?.show();
   };
 
-  const handleAction = async (index) => {
+  const handleAction = async index => {
     try {
       if (index === 0) {
         // Chụp ảnh
@@ -54,7 +63,8 @@ const SearchBar = ({ disable, onSearch, onImagePicked }) => {
     } catch (error) {
       if (error.message !== 'User cancelled image selection') {
         Alert.alert('Lỗi', 'Không thể chọn ảnh. Vui lòng thử lại.');
-        console.error(error);
+        // console.error(error);
+        console.log('Error selecting image:', error);
       }
     }
   };
@@ -65,28 +75,34 @@ const SearchBar = ({ disable, onSearch, onImagePicked }) => {
   };
 
   return (
-      <View style={styles.searchContainer}>
-        <TextInput
-            value={searchText}
-            style={styles.searchInput}
-            placeholder="Tìm kiếm..."
-            placeholderTextColor={'#bbb'}
-            onChangeText={handleTextChange}
-            onSubmitEditing={handleSubmitEditing}
-            editable={disable}
-        />
-        {searchText.length > 0 && (
-            <TouchableOpacity style={styles.clearButton} onPress={handleClearText}>
-              <Image source={require('../assets/bt_clearText.png')} style={styles.icon} />
-            </TouchableOpacity>
-        )}
-        <TouchableOpacity style={styles.searchButton} onPress={openActionSheet}>
-          <Image source={require('../assets/icons/ic_camera.png')} style={styles.searchIcon} />
+    <View style={styles.searchContainer}>
+      <TextInput
+        value={searchText}
+        style={styles.searchInput}
+        placeholder="Tìm kiếm..."
+        placeholderTextColor={'#bbb'}
+        onChangeText={handleTextChange}
+        onSubmitEditing={handleSubmitEditing}
+        editable={disable}
+      />
+      {searchText.length > 0 && (
+        <TouchableOpacity style={styles.clearButton} onPress={handleClearText}>
+          <Image
+            source={require('../assets/bt_clearText.png')}
+            style={styles.icon}
+          />
         </TouchableOpacity>
+      )}
+      <TouchableOpacity style={styles.searchButton} onPress={openActionSheet}>
+        <Image
+          source={require('../assets/icons/ic_camera.png')}
+          style={styles.searchIcon}
+        />
+      </TouchableOpacity>
 
-        {/* Bottom Sheet */}
-        <ImagePickerSheet ref={actionSheetRef} onActionSelect={handleAction} />
-      </View>
+      {/* Bottom Sheet */}
+      <ImagePickerSheet ref={actionSheetRef} onActionSelect={handleAction} />
+    </View>
   );
 };
 

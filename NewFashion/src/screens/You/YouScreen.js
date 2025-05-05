@@ -25,16 +25,14 @@ const YouScreen = ({navigation}) => {
   const handleNavigate = item => {
     if (item?.text !== 'Messages') {
       navigation.navigate(item.text);
-    }
-    else {
+    } else {
       if (personalInfo._id) {
         if (personalInfo?.role === 0) {
-          navigation.navigate('ChatDetail',{id : '67eeafc786a3c7e95e9d3a73'});
-        }
-        else if (personalInfo?.role === 1 || personalInfo?.role === 2) {
+          navigation.navigate('ChatDetail', {id: '67eeafc786a3c7e95e9d3a73'});
+        } else if (personalInfo?.role === 1 || personalInfo?.role === 2) {
           navigation.navigate(item.text);
         }
-      }else {
+      } else {
         navigation.navigate('Login');
       }
     }
@@ -48,7 +46,8 @@ const YouScreen = ({navigation}) => {
         const historyArray = storedHistory ? JSON.parse(storedHistory) : [];
         setBrowsingHistory(historyArray);
       } catch (error) {
-        console.error('Error fetching browsing history:', error);
+        // console.error('Error fetching browsing history:', error);
+        console.log('Error fetching browsing history:', error);
       }
     };
 
@@ -108,14 +107,14 @@ const YouScreen = ({navigation}) => {
                     </Text>
                     <View style={st.infoContainer}>
                       <BenefitsInfoBox
-                        icon={require('../../assets/icons/ic_freeReturns.png')}
-                        title="Miễn phí hoàn hàng"
-                        subtitle="Trong vòng 90 ngày"
-                      />
-                      <BenefitsInfoBox
                         icon={require('../../assets/icons/ic_freeShipping.png')}
                         title="Miễn phí vận chuyển"
                         subtitle="Cho tất cả đơn hàng"
+                      />
+                      <BenefitsInfoBox
+                        icon={require('../../assets/icons/ic_freeReturns.png')}
+                        title="Miễn phí hoàn hàng"
+                        subtitle="Trong vòng 90 ngày"
                       />
                     </View>
                     <FilledButton
@@ -139,22 +138,15 @@ const YouScreen = ({navigation}) => {
                   ))}
                   <View style={st.historyItem}>
                     <Text style={st.sectionTitle}>Sản phẩm đã xem</Text>
-                    <View style={{flexDirection: 'row'}}>
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          color: '#737373',
-                          fontWeight: '700',
-                          flex: 1,
-                        }}>
-                        Bạn cần đăng nhập để xem sản phẩm đã xem
-                      </Text>
-                      <Image
-                        source={require('../../assets/icons/ic_next.png')}
-                        style={{height: 15, width: 15}}
-                        resizeMode="contain"
-                      />
-                    </View>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: '#737373',
+                        fontWeight: '700',
+                        flex: 1,
+                      }}>
+                      Bạn cần đăng nhập để xem sản phẩm đã xem
+                    </Text>
                   </View>
                 </View>
               </>
@@ -209,7 +201,7 @@ const YouScreen = ({navigation}) => {
                         key={item.id}
                         style={st.bottomMenuItem}
                         onPress={() => {
-                          navigation.navigate(item.title)
+                          navigation.navigate(item.title);
                         }}>
                         <Image source={item.icon} style={st.menuIcon} />
                         <Text style={st.menuText}>{item.text}</Text>

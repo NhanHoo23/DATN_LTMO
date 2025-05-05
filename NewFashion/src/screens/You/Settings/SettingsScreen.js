@@ -2,9 +2,9 @@ import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import BaseHeader from '../../../components/BaseHeader';
 import AppManager from '../../../utils/AppManager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {onGoogleSignOut} from "../../Login/signInWithGoogle";
-import {useDispatch} from "react-redux";
-import {logout} from "../../../redux/reducer/userReducer";
+import {onGoogleSignOut} from '../../Login/signInWithGoogle';
+import {useDispatch} from 'react-redux';
+import {logout} from '../../../redux/reducer/userReducer';
 
 const options = [
   {
@@ -42,7 +42,7 @@ const anotherOptions = [
     id: '4',
     title: 'Đăng xuất',
     nameScreen: '',
-    h3: 'Đăng xuất'
+    h3: 'Đăng xuất',
   },
 ];
 
@@ -69,8 +69,14 @@ const SettingsScreen = ({navigation}) => {
         </View>
         <View
           style={[
-            index === 0 && (AppManager.shared.isUserLoggedIn() ? styles.line : styles.firstIndex),
-            index !== 0 && (!AppManager.shared.isUserLoggedIn() ? styles.firstIndex : styles.line),
+            index === 0 &&
+              (AppManager.shared.isUserLoggedIn()
+                ? styles.line
+                : styles.firstIndex),
+            index !== 0 &&
+              (!AppManager.shared.isUserLoggedIn()
+                ? styles.firstIndex
+                : styles.line),
             index === options.length - 1 && styles.lastIndex,
             title === 'Sign out' && styles.lastIndex,
             title === 'Sign in / Register' && styles.firstIndex,
@@ -93,7 +99,8 @@ const SettingsScreen = ({navigation}) => {
           <View style={styles.heading}>
             <Text style={styles.h2}>Tài khoản của bạn được bảo vệ</Text>
             <Text style={styles.p}>
-            New Fashion bảo vệ thông tin cá nhân của bạn và giữ cho thông tin đó được riêng tư, an toàn và bảo mật.
+              New Fashion bảo vệ thông tin cá nhân của bạn và giữ cho thông tin
+              đó được riêng tư, an toàn và bảo mật.
             </Text>
           </View>
 
@@ -105,17 +112,17 @@ const SettingsScreen = ({navigation}) => {
               item={item}
               onPress={() => {
                 if (item.title === 'Đăng xuất') {
-                  AppManager.shared.removeUserInfo()
+                  AppManager.shared.removeUserInfo();
                   navigation.reset({
                     index: 0,
-                    routes: [{ name: 'Splash' }],
+                    routes: [{name: 'Splash'}],
                   });
 
                   AsyncStorage.removeItem('browsingHistory');
-                  dispatch(logout())
+                  dispatch(logout());
                   onGoogleSignOut();
                 } else {
-                  handleNavigate(item)
+                  handleNavigate(item);
                 }
               }}
             />

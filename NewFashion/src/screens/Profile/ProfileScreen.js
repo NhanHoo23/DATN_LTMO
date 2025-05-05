@@ -14,8 +14,6 @@ function ProfileScreen({navigation}) {
   const {personalInfo} = useSelector(state => state.personalInfo);
   const {avatar, name} = personalInfo;
 
-  console.log('personalInfo: ', personalInfo);
-
   const user = {
     avatar,
     name,

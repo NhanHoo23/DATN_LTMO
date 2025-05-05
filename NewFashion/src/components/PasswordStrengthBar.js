@@ -1,98 +1,95 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { ProgressBar } from 'react-native-paper';
+import React, {useEffect, useMemo} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
+import {ProgressBar} from 'react-native-paper';
 
-const PasswordStrengthBar = ({ password, customStyle, onChangeText }) => {
-    const getPasswordStrength = (password) => {
-        const minLength = 8;
-        let strength = 0;
+const PasswordStrengthBar = ({password, customStyle, onChangeText}) => {
+  const getPasswordStrength = password => {
+    const minLength = 8;
+    let strength = 0;
 
-        if (password.length >= minLength) {
-            strength += 1;
-        }
+    if (password.length >= minLength) {
+      strength += 1;
+    }
 
-        if (/[A-Z]/.test(password)) {
-            strength += 1;
-        }
+    if (/[A-Z]/.test(password)) {
+      strength += 1;
+    }
 
-        if (/[a-z]/.test(password)) {
-            strength += 1;
-        }
+    if (/[a-z]/.test(password)) {
+      strength += 1;
+    }
 
-        if (/[0-9]/.test(password)) {
-            strength += 1;
-        }
+    if (/[0-9]/.test(password)) {
+      strength += 1;
+    }
 
-        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            strength += 1;
-        }
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      strength += 1;
+    }
 
-        switch (strength) {
-            case 1:
-                onChangeText('Weak');
-                break
-            case 2:
-                onChangeText('Fair');
-                break
-            case 3:
-                onChangeText('Good');
-                break
-            case 4:
-                onChangeText('Strong');
-                break
-            default:
-                onChangeText('');
-        }
+    return strength;
+  };
 
-        return strength;
-    };
+  const strength = useMemo(() => getPasswordStrength(password), [password]);
 
-    const strength = getPasswordStrength(password);
+  useEffect(() => {
+    switch (strength) {
+      case 1:
+        onChangeText('Weak');
+        break;
+      case 2:
+        onChangeText('Fair');
+        break;
+      case 3:
+        onChangeText('Good');
+        break;
+      case 4:
+        onChangeText('Strong');
+        break;
+      default:
+        onChangeText('');
+    }
+  }, [strength, onChangeText]);
 
-    // const getStrengthLabel = () => {
-        
-    // };
+  const getStrengthColor = () => {
+    switch (strength) {
+      case 1:
+        return '#DF0808';
+      case 2:
+        return '#EE640F';
+      case 3:
+        return '#EF9E1C';
+      case 4:
+        return '#239759';
+      default:
+        return 'lightgray';
+    }
+  };
 
-    // useEffect(() => {
-    //     getStrengthLabel();
-    // }, []);
-
-    const getStrengthColor = () => {
-        switch (strength) {
-            case 1:
-                return '#DF0808';
-            case 2:
-                return '#EE640F';
-            case 3:
-                return '#EF9E1C';
-            case 4:
-                return '#239759';
-            default:
-                return 'lightgray';
-        }
-    };
-
-    return (
-        <View style={[styles.container, customStyle]}>
-            <ProgressBar progress={strength / 4} color={getStrengthColor()} style={styles.progressBar} />
-        </View>
-    );
+  return (
+    <View style={[styles.container, customStyle]}>
+      <ProgressBar
+        progress={strength / 4}
+        color={getStrengthColor()}
+        style={styles.progressBar}
+      />
+    </View>
+  );
 };
 
 export default PasswordStrengthBar;
 
 const styles = StyleSheet.create({
-    container: {
-    },
-    progressBar: {
-        height: 8,
-        borderRadius: 8,
-        backgroundColor: 'lightgray',
-    },
-    strengthLabel: {
-        marginTop: 5,
-        fontSize: 12,
-        color: 'gray',
-        textAlign: 'right',
-    },
+  container: {},
+  progressBar: {
+    height: 8,
+    borderRadius: 8,
+    backgroundColor: 'lightgray',
+  },
+  strengthLabel: {
+    marginTop: 5,
+    fontSize: 12,
+    color: 'gray',
+    textAlign: 'right',
+  },
 });

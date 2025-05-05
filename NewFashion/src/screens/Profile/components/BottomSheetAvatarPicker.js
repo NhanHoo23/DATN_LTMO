@@ -5,7 +5,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import {requestPermission} from '../../../utils/permissions';
 import {useRetryAfterSettings} from '../../../hooks/useRetryAfterSettings';
 import {useNavigation} from '@react-navigation/native';
-import {TYPE_PICKER} from '../../../contants';
+import {TYPE_PICKER} from '../../../constants';
 
 export default function BottomSheetAvatarPicker() {
   const bottomSheet = useBottomSheet();

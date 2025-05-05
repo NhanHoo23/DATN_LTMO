@@ -44,6 +44,7 @@
     "react-native-photo-manipulator": "^1.9.2",
     "react-native-progress": "^5.0.1",
     "react-native-reanimated": "^3.16.7",
+    "react-native-render-html": "^6.3.4",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.6.0",
     "react-native-skeleton-content": "^1.0.13",
@@ -53,6 +54,7 @@
     "react-redux": "^9.2.0",
     "reanimated-bottom-sheet": "^1.0.0-alpha.22",
     "redux": "^5.0.1",
+    "slate": "^0.114.0",
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
